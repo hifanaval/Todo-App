@@ -21,7 +21,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Load initial data - shows DB data if available
+    debugPrint('HomePage: initState - Loading initial todos');
+    // Load initial data - shows DB data if available, fetches from API if empty
     context.read<HomeBloc>().add(LoadInitialTodos());
     
     // Pagination listener

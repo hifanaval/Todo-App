@@ -51,18 +51,18 @@ class EmptyState extends StatelessWidget {
           Text(
             hasTriedApiAndFailed 
                 ? 'Unable to load data. Please check your connection and try again.'
-                : 'Pull down to refresh',
+                : 'Pull down to refresh or tap the refresh button',
             style: TextStyleClass.primaryFont400(14, textSecondaryColor),
             textAlign: TextAlign.center,
           ),
-          // Show refresh button when "No data found" (API failed)
-          if (hasTriedApiAndFailed && onRefresh != null) ...[
+          // Always show refresh button when onRefresh is provided
+          if (onRefresh != null) ...[
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: onRefresh,
               icon: const Icon(Icons.refresh_rounded),
               label: Text(
-                'Retry',
+                hasTriedApiAndFailed ? 'Retry' : 'Refresh',
                 style: TextStyleClass.primaryFont500(16, Colors.white),
               ),
               style: ElevatedButton.styleFrom(

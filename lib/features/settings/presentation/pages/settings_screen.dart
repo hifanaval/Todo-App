@@ -10,6 +10,8 @@ import 'package:to_do_app/core/theme/theme_state.dart';
 import 'package:to_do_app/core/utils/app_utils.dart';
 import 'package:to_do_app/features/auth/bloc/auth_bloc.dart';
 import 'package:to_do_app/features/auth/bloc/auth_event.dart';
+import 'package:to_do_app/features/home/presentation/bloc/home_bloc.dart';
+import 'package:to_do_app/features/home/presentation/bloc/home_event.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -56,8 +58,14 @@ class SettingsScreen extends StatelessWidget {
 
     if (shouldClear == true) {
       try {
+        debugPrint('SettingsScreen: Clearing cached data and todos');
+        
+        // Clear todos from local database
+        context.read<HomeBloc>().add(ClearTodosEvent());
+        debugPrint('SettingsScreen: Cleared todos from database');
+        
+        // Clear SharedPreferences cache (except login credentials)
         final prefs = await SharedPreferences.getInstance();
-        // Clear all cached preferences except login credentials
         final email = prefs.getString('email');
         final password = prefs.getString('password');
         final isLoggedIn = prefs.getBool('is_logged_in') ?? false;

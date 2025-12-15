@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -6,10 +5,19 @@ import 'package:to_do_app/core/components/background_screen.dart';
 import 'package:to_do_app/core/constants/color_class.dart';
 import 'package:to_do_app/core/constants/textstyle_class.dart';
 import 'package:to_do_app/core/utils/app_utils.dart';
+import 'package:to_do_app/core/utils/image_picker_utils.dart';
 import 'package:to_do_app/features/auth/data/local_auth_source.dart';
 import 'package:to_do_app/features/profile/bloc/profile_bloc.dart';
 import 'package:to_do_app/features/profile/bloc/profile_event.dart';
 import 'package:to_do_app/features/profile/bloc/profile_state.dart';
+import '../widgets/profile_completeness_indicator.dart';
+import '../widgets/profile_picture_picker.dart';
+import '../widgets/username_field.dart';
+import '../widgets/date_of_birth_field.dart';
+import '../widgets/save_profile_button.dart';
+import '../widgets/profile_error_state.dart';
+import '../widgets/unsaved_changes_dialog.dart';
+import '../widgets/profile_utils.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -59,7 +67,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _originalDateOfBirth = profile.dateOfBirth;
     
     if (_selectedDateOfBirth != null) {
-      _dateOfBirthController.text = '${_selectedDateOfBirth!.year}-${_selectedDateOfBirth!.month.toString().padLeft(2, '0')}-${_selectedDateOfBirth!.day.toString().padLeft(2, '0')}';
+      _dateOfBirthController.text = ProfileUtils.formatDateOfBirth(_selectedDateOfBirth!);
     }
     
     _hasUnsavedChanges = false;
@@ -83,70 +91,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
 
     debugPrint('EditProfileScreen: Unsaved changes detected, showing confirmation');
-    final shouldLeave = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        backgroundColor: ColorClass.kCardColor,
-        title: Text(
-          'Unsaved Changes',
-          style: TextStyleClass.primaryFont600(18, ColorClass.kTextColor),
-        ),
-        content: Text(
-          'You have unsaved changes. Are you sure you want to leave?',
-          style: TextStyleClass.primaryFont400(14, ColorClass.kTextSecondary),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: TextStyleClass.primaryFont500(14, ColorClass.kTextSecondary),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: ColorClass.stateError,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(
-              'Leave',
-              style: TextStyleClass.primaryFont500(14, Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    return shouldLeave ?? false;
+    return await UnsavedChangesDialog.show(context);
   }
 
   Future<void> _pickImage() async {
     debugPrint('EditProfileScreen: Opening image picker');
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 512,
-        maxHeight: 512,
-        imageQuality: 85,
-      );
+    final imagePath = await ImagePickerUtils.pickImage(
+      source: ImageSource.gallery,
+      context: context,
+    );
 
-      if (image != null) {
-        setState(() {
-          _profilePicturePath = image.path;
-          _checkForChanges();
-        });
-        debugPrint('EditProfileScreen: Image selected: ${image.path}');
-      }
-    } catch (e) {
-      debugPrint('EditProfileScreen: Error picking image: $e');
-      if (mounted) {
-        AppUtils.showToast(context, message: 'Failed to pick image');
-      }
+    if (imagePath != null && mounted) {
+      setState(() {
+        _profilePicturePath = imagePath;
+        _checkForChanges();
+      });
+      debugPrint('EditProfileScreen: Image selected: $imagePath');
     }
   }
 
@@ -173,20 +133,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (picked != null) {
       setState(() {
         _selectedDateOfBirth = picked;
-        _dateOfBirthController.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+        _dateOfBirthController.text = ProfileUtils.formatDateOfBirth(picked);
         _checkForChanges();
       });
       debugPrint('EditProfileScreen: Date selected: ${_dateOfBirthController.text}');
     }
   }
 
-  int _calculateProfileCompleteness(dynamic profile) {
-    int completeness = 0;
-    if (profile.username.isNotEmpty) completeness += 33;
-    if (profile.profilePicturePath != null && profile.profilePicturePath!.isNotEmpty) completeness += 33;
-    if (profile.dateOfBirth != null) completeness += 34;
-    return completeness;
-  }
 
   void _saveProfile() {
     if (!_formKey.currentState!.validate()) {
@@ -305,35 +258,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               } else if (state is ProfileUpdated) {
                 currentProfile = state.profile;
               } else if (_profileId == null) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: ColorClass.stateError,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Failed to load profile',
-                        style: TextStyleClass.primaryFont600(
-                          18,
-                          ColorClass.kTextColor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: _loadProfile,
-                        child: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                );
+                return ProfileErrorState(onRetry: _loadProfile);
               }
 
               final completeness = currentProfile != null
-                  ? _calculateProfileCompleteness(currentProfile)
+                  ? ProfileUtils.calculateCompleteness(
+                      username: currentProfile.username,
+                      profilePicturePath: currentProfile.profilePicturePath,
+                      dateOfBirth: currentProfile.dateOfBirth,
+                    )
                   : 0;
 
               return SingleChildScrollView(
@@ -345,185 +278,36 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     children: [
                       // Profile Completeness Indicator
                       if (currentProfile != null) ...[
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: ColorClass.kCardColor,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Profile Completeness',
-                                    style: TextStyleClass.primaryFont600(
-                                      16,
-                                      ColorClass.kTextColor,
-                                    ),
-                                  ),
-                                  Text(
-                                    '$completeness%',
-                                    style: TextStyleClass.primaryFont600(
-                                      16,
-                                      ColorClass.kPrimaryColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: LinearProgressIndicator(
-                                  value: completeness / 100,
-                                  minHeight: 8,
-                                  backgroundColor: ColorClass.neutral200,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    ColorClass.kPrimaryColor,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ProfileCompletenessIndicator(completeness: completeness),
                         const SizedBox(height: 24),
                       ],
 
                       // Profile Picture
-                      Center(
-                        child: Stack(
-                          children: [
-                            Container(
-                              width: 120,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: ColorClass.kPrimaryColor,
-                                  width: 3,
-                                ),
-                                color: ColorClass.neutral200,
-                              ),
-                              child: _profilePicturePath != null &&
-                                      File(_profilePicturePath!).existsSync()
-                                  ? ClipOval(
-                                      child: Image.file(
-                                        File(_profilePicturePath!),
-                                        fit: BoxFit.cover,
-                                      ),
-                                    )
-                                  : Icon(
-                                      Icons.person,
-                                      size: 60,
-                                      color: ColorClass.kTextSecondary,
-                                    ),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: ColorClass.kPrimaryColor,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: ColorClass.kCardColor,
-                                    width: 2,
-                                  ),
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.camera_alt,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                  onPressed: _pickImage,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                      ProfilePicturePicker(
+                        profilePicturePath: _profilePicturePath,
+                        onPickImage: _pickImage,
                       ),
                       const SizedBox(height: 32),
 
                       // Username Field
-                      Text(
-                        'Username',
-                        style: TextStyleClass.primaryFont500(
-                          14,
-                          ColorClass.kTextColor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
+                      UsernameField(
                         controller: _usernameController,
-                        decoration: InputDecoration(
-                          hintText: 'Enter username',
-                          prefixIcon: const Icon(Icons.person_outline),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Username is required';
-                          }
-                          if (value.trim().length < 3) {
-                            return 'Username must be at least 3 characters';
-                          }
-                          return null;
-                        },
                         onChanged: (_) => _checkForChanges(),
                       ),
                       const SizedBox(height: 24),
 
                       // Date of Birth Field
-                      Text(
-                        'Date of Birth',
-                        style: TextStyleClass.primaryFont500(
-                          14,
-                          ColorClass.kTextColor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
+                      DateOfBirthField(
                         controller: _dateOfBirthController,
-                        readOnly: true,
-                        decoration: InputDecoration(
-                          hintText: 'Select date of birth',
-                          prefixIcon: const Icon(Icons.calendar_today_outlined),
-                        ),
                         onTap: _selectDateOfBirth,
                       ),
                       const SizedBox(height: 32),
 
                       // Save Button
-                      ElevatedButton(
-                        onPressed: _hasUnsavedChanges ? _saveProfile : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ColorClass.kPrimaryColor,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: state is ProfileLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
-                                  ),
-                                ),
-                              )
-                            : Text(
-                                'Save Changes',
-                                style: TextStyleClass.primaryFont600(
-                                  16,
-                                  Colors.white,
-                                ),
-                              ),
+                      SaveProfileButton(
+                        isEnabled: _hasUnsavedChanges,
+                        isLoading: state is ProfileLoading,
+                        onPressed: _saveProfile,
                       ),
                     ],
                   ),

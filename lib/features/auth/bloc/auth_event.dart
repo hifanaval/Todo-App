@@ -59,3 +59,79 @@ class CheckAuthStatusEvent extends AuthEvent {
   const CheckAuthStatusEvent();
 }
 
+// Registration Form Events
+class InitializeRegistrationFormEvent extends AuthEvent {
+  const InitializeRegistrationFormEvent();
+}
+
+class UpdateUsernameEvent extends AuthEvent {
+  final String username;
+
+  const UpdateUsernameEvent(this.username);
+
+  @override
+  List<Object?> get props => [username];
+}
+
+class UpdateFullNameEvent extends AuthEvent {
+  final String fullName;
+
+  const UpdateFullNameEvent(this.fullName);
+
+  @override
+  List<Object?> get props => [fullName];
+}
+
+class UpdateEmailEvent extends AuthEvent {
+  final String email;
+
+  const UpdateEmailEvent(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}
+
+class UpdatePasswordEvent extends AuthEvent {
+  final String password;
+
+  const UpdatePasswordEvent(this.password);
+
+  @override
+  List<Object?> get props => [password];
+}
+
+class UpdateConfirmPasswordEvent extends AuthEvent {
+  final String confirmPassword;
+
+  const UpdateConfirmPasswordEvent(this.confirmPassword);
+
+  @override
+  List<Object?> get props => [confirmPassword];
+}
+
+class UpdateDateOfBirthEvent extends AuthEvent {
+  final String dateString;
+  final DateTime? dateTime;
+
+  const UpdateDateOfBirthEvent({
+    required this.dateString,
+    this.dateTime,
+  });
+
+  @override
+  List<Object?> get props => [dateString, dateTime];
+}
+
+class UpdateProfilePictureEvent extends AuthEvent {
+  final String? imagePath;
+
+  const UpdateProfilePictureEvent(this.imagePath);
+
+  @override
+  List<Object?> get props => [imagePath];
+}
+
+class ValidateRegistrationFormEvent extends AuthEvent {
+  const ValidateRegistrationFormEvent();
+}
+

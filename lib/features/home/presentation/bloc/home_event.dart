@@ -21,3 +21,5 @@ class ToggleFavorite extends HomeEvent {
   ToggleFavorite(this.id);
 }
 
+class ClearTodosEvent extends HomeEvent {}
+

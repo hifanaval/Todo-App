@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:to_do_app/core/constants/textstyle_class.dart';
 
 class ToastWidget extends StatefulWidget {
   final String message;
   final VoidCallback onDismiss;
 
-  const ToastWidget({super.key, 
+  const ToastWidget({
+    super.key,
     required this.message,
     required this.onDismiss,
   });
@@ -28,20 +30,12 @@ class ToastWidgetState extends State<ToastWidget>
       duration: const Duration(milliseconds: 250),
     );
 
-    _fade = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    );
+    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
 
     _slide = Tween<Offset>(
       begin: const Offset(0, 0.2),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
   }
@@ -55,7 +49,7 @@ class ToastWidgetState extends State<ToastWidget>
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 90,
+      bottom: 60,
       left: 0,
       right: 0,
       child: SafeArea(
@@ -67,27 +61,19 @@ class ToastWidgetState extends State<ToastWidget>
               child: Material(
                 color: Colors.transparent,
                 child: Container(
+                  width: MediaQuery.of(context).size.width * 0.7,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 10,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.9),
+                    color: Colors.grey[500],
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.25),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
-                  child: Text(
-                    widget.message,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
+                  child: Center(
+                    child: Text(
+                      widget.message,
+                      style: TextStyleClass.primaryFont500(13, Colors.white),
                     ),
                   ),
                 ),

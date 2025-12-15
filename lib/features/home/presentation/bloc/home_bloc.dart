@@ -25,6 +25,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<ToggleTodo>(_onToggleTodo);
     on<DeleteTodo>(_onDeleteTodo);
     on<ToggleFavorite>(_onToggleFavorite);
+    on<ClearTodosEvent>(_onClearTodos);
   }
 
   /// Load initial todos - shows DB data first, then fetches from API if empty
@@ -295,6 +296,31 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }).toList();
 
     emit(state.copyWith(todos: updatedTodos));
+  }
+
+  /// Clear all todos from local database
+  Future<void> _onClearTodos(
+    ClearTodosEvent event,
+    Emitter<HomeState> emit,
+  ) async {
+    debugPrint('🧹 HomeBloc: Clearing all todos from local database');
+    try {
+      await repository.local.clearTodos();
+      debugPrint('✅ HomeBloc: Todos cleared successfully');
+      
+      // Reset state to empty
+      emit(state.copyWith(
+        todos: [],
+        hasMore: true,
+        hasTriedApiAndFailed: false,
+      ));
+      _currentSkip = 0;
+      
+      debugPrint('✅ HomeBloc: State reset after clearing todos');
+    } catch (e) {
+      debugPrint('❌ HomeBloc: Error clearing todos: $e');
+      // Don't emit error state, just log it
+    }
   }
 }
 
