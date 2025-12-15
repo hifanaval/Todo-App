@@ -7,14 +7,8 @@ import 'app_utils.dart';
 class ImagePickerUtils {
   static final ImagePicker _picker = ImagePicker();
 
-  /// Pick an image from the specified source with permission handling
-  /// 
-  /// [source] - ImageSource.camera or ImageSource.gallery
-  /// [context] - BuildContext for showing toasts and dialogs
-  /// [maxWidth] - Maximum width for the image (optional, default: 512)
-  /// [maxHeight] - Maximum height for the image (optional, default: 512)
-  /// [imageQuality] - Image quality 0-100 (optional, default: 85)
-  /// 
+
+
   /// Returns the picked image file path, or null if cancelled/error
   static Future<String?> pickImage({
     required ImageSource source,

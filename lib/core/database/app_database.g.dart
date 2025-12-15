@@ -833,16 +833,552 @@ class TodoTableCompanion extends UpdateCompanion<TodoTableData> {
   }
 }
 
+class $SavedAccountsTable extends SavedAccounts
+    with TableInfo<$SavedAccountsTable, SavedAccount> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SavedAccountsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 5,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _passwordMeta = const VerificationMeta(
+    'password',
+  );
+  @override
+  late final GeneratedColumn<String> password = GeneratedColumn<String>(
+    'password',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 6,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _usernameMeta = const VerificationMeta(
+    'username',
+  );
+  @override
+  late final GeneratedColumn<String> username = GeneratedColumn<String>(
+    'username',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 3,
+      maxTextLength: 50,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fullNameMeta = const VerificationMeta(
+    'fullName',
+  );
+  @override
+  late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
+    'full_name',
+    aliasedName,
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 2,
+      maxTextLength: 100,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _profilePicturePathMeta =
+      const VerificationMeta('profilePicturePath');
+  @override
+  late final GeneratedColumn<String> profilePicturePath =
+      GeneratedColumn<String>(
+        'profile_picture_path',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _lastLoginAtMeta = const VerificationMeta(
+    'lastLoginAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastLoginAt = GeneratedColumn<DateTime>(
+    'last_login_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    email,
+    password,
+    username,
+    fullName,
+    profilePicturePath,
+    lastLoginAt,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'saved_accounts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SavedAccount> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_emailMeta);
+    }
+    if (data.containsKey('password')) {
+      context.handle(
+        _passwordMeta,
+        password.isAcceptableOrUnknown(data['password']!, _passwordMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_passwordMeta);
+    }
+    if (data.containsKey('username')) {
+      context.handle(
+        _usernameMeta,
+        username.isAcceptableOrUnknown(data['username']!, _usernameMeta),
+      );
+    }
+    if (data.containsKey('full_name')) {
+      context.handle(
+        _fullNameMeta,
+        fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta),
+      );
+    }
+    if (data.containsKey('profile_picture_path')) {
+      context.handle(
+        _profilePicturePathMeta,
+        profilePicturePath.isAcceptableOrUnknown(
+          data['profile_picture_path']!,
+          _profilePicturePathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_login_at')) {
+      context.handle(
+        _lastLoginAtMeta,
+        lastLoginAt.isAcceptableOrUnknown(
+          data['last_login_at']!,
+          _lastLoginAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SavedAccount map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SavedAccount(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      )!,
+      password: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}password'],
+      )!,
+      username: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}username'],
+      ),
+      fullName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_name'],
+      ),
+      profilePicturePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_picture_path'],
+      ),
+      lastLoginAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_login_at'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SavedAccountsTable createAlias(String alias) {
+    return $SavedAccountsTable(attachedDatabase, alias);
+  }
+}
+
+class SavedAccount extends DataClass implements Insertable<SavedAccount> {
+  final int id;
+  final String email;
+  final String password;
+  final String? username;
+  final String? fullName;
+  final String? profilePicturePath;
+  final DateTime lastLoginAt;
+  final DateTime createdAt;
+  const SavedAccount({
+    required this.id,
+    required this.email,
+    required this.password,
+    this.username,
+    this.fullName,
+    this.profilePicturePath,
+    required this.lastLoginAt,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['email'] = Variable<String>(email);
+    map['password'] = Variable<String>(password);
+    if (!nullToAbsent || username != null) {
+      map['username'] = Variable<String>(username);
+    }
+    if (!nullToAbsent || fullName != null) {
+      map['full_name'] = Variable<String>(fullName);
+    }
+    if (!nullToAbsent || profilePicturePath != null) {
+      map['profile_picture_path'] = Variable<String>(profilePicturePath);
+    }
+    map['last_login_at'] = Variable<DateTime>(lastLoginAt);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  SavedAccountsCompanion toCompanion(bool nullToAbsent) {
+    return SavedAccountsCompanion(
+      id: Value(id),
+      email: Value(email),
+      password: Value(password),
+      username: username == null && nullToAbsent
+          ? const Value.absent()
+          : Value(username),
+      fullName: fullName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fullName),
+      profilePicturePath: profilePicturePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(profilePicturePath),
+      lastLoginAt: Value(lastLoginAt),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory SavedAccount.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SavedAccount(
+      id: serializer.fromJson<int>(json['id']),
+      email: serializer.fromJson<String>(json['email']),
+      password: serializer.fromJson<String>(json['password']),
+      username: serializer.fromJson<String?>(json['username']),
+      fullName: serializer.fromJson<String?>(json['fullName']),
+      profilePicturePath: serializer.fromJson<String?>(
+        json['profilePicturePath'],
+      ),
+      lastLoginAt: serializer.fromJson<DateTime>(json['lastLoginAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'email': serializer.toJson<String>(email),
+      'password': serializer.toJson<String>(password),
+      'username': serializer.toJson<String?>(username),
+      'fullName': serializer.toJson<String?>(fullName),
+      'profilePicturePath': serializer.toJson<String?>(profilePicturePath),
+      'lastLoginAt': serializer.toJson<DateTime>(lastLoginAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  SavedAccount copyWith({
+    int? id,
+    String? email,
+    String? password,
+    Value<String?> username = const Value.absent(),
+    Value<String?> fullName = const Value.absent(),
+    Value<String?> profilePicturePath = const Value.absent(),
+    DateTime? lastLoginAt,
+    DateTime? createdAt,
+  }) => SavedAccount(
+    id: id ?? this.id,
+    email: email ?? this.email,
+    password: password ?? this.password,
+    username: username.present ? username.value : this.username,
+    fullName: fullName.present ? fullName.value : this.fullName,
+    profilePicturePath: profilePicturePath.present
+        ? profilePicturePath.value
+        : this.profilePicturePath,
+    lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  SavedAccount copyWithCompanion(SavedAccountsCompanion data) {
+    return SavedAccount(
+      id: data.id.present ? data.id.value : this.id,
+      email: data.email.present ? data.email.value : this.email,
+      password: data.password.present ? data.password.value : this.password,
+      username: data.username.present ? data.username.value : this.username,
+      fullName: data.fullName.present ? data.fullName.value : this.fullName,
+      profilePicturePath: data.profilePicturePath.present
+          ? data.profilePicturePath.value
+          : this.profilePicturePath,
+      lastLoginAt: data.lastLoginAt.present
+          ? data.lastLoginAt.value
+          : this.lastLoginAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavedAccount(')
+          ..write('id: $id, ')
+          ..write('email: $email, ')
+          ..write('password: $password, ')
+          ..write('username: $username, ')
+          ..write('fullName: $fullName, ')
+          ..write('profilePicturePath: $profilePicturePath, ')
+          ..write('lastLoginAt: $lastLoginAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    email,
+    password,
+    username,
+    fullName,
+    profilePicturePath,
+    lastLoginAt,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SavedAccount &&
+          other.id == this.id &&
+          other.email == this.email &&
+          other.password == this.password &&
+          other.username == this.username &&
+          other.fullName == this.fullName &&
+          other.profilePicturePath == this.profilePicturePath &&
+          other.lastLoginAt == this.lastLoginAt &&
+          other.createdAt == this.createdAt);
+}
+
+class SavedAccountsCompanion extends UpdateCompanion<SavedAccount> {
+  final Value<int> id;
+  final Value<String> email;
+  final Value<String> password;
+  final Value<String?> username;
+  final Value<String?> fullName;
+  final Value<String?> profilePicturePath;
+  final Value<DateTime> lastLoginAt;
+  final Value<DateTime> createdAt;
+  const SavedAccountsCompanion({
+    this.id = const Value.absent(),
+    this.email = const Value.absent(),
+    this.password = const Value.absent(),
+    this.username = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.profilePicturePath = const Value.absent(),
+    this.lastLoginAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  SavedAccountsCompanion.insert({
+    this.id = const Value.absent(),
+    required String email,
+    required String password,
+    this.username = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.profilePicturePath = const Value.absent(),
+    this.lastLoginAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : email = Value(email),
+       password = Value(password);
+  static Insertable<SavedAccount> custom({
+    Expression<int>? id,
+    Expression<String>? email,
+    Expression<String>? password,
+    Expression<String>? username,
+    Expression<String>? fullName,
+    Expression<String>? profilePicturePath,
+    Expression<DateTime>? lastLoginAt,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (email != null) 'email': email,
+      if (password != null) 'password': password,
+      if (username != null) 'username': username,
+      if (fullName != null) 'full_name': fullName,
+      if (profilePicturePath != null)
+        'profile_picture_path': profilePicturePath,
+      if (lastLoginAt != null) 'last_login_at': lastLoginAt,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  SavedAccountsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? email,
+    Value<String>? password,
+    Value<String?>? username,
+    Value<String?>? fullName,
+    Value<String?>? profilePicturePath,
+    Value<DateTime>? lastLoginAt,
+    Value<DateTime>? createdAt,
+  }) {
+    return SavedAccountsCompanion(
+      id: id ?? this.id,
+      email: email ?? this.email,
+      password: password ?? this.password,
+      username: username ?? this.username,
+      fullName: fullName ?? this.fullName,
+      profilePicturePath: profilePicturePath ?? this.profilePicturePath,
+      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    if (password.present) {
+      map['password'] = Variable<String>(password.value);
+    }
+    if (username.present) {
+      map['username'] = Variable<String>(username.value);
+    }
+    if (fullName.present) {
+      map['full_name'] = Variable<String>(fullName.value);
+    }
+    if (profilePicturePath.present) {
+      map['profile_picture_path'] = Variable<String>(profilePicturePath.value);
+    }
+    if (lastLoginAt.present) {
+      map['last_login_at'] = Variable<DateTime>(lastLoginAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SavedAccountsCompanion(')
+          ..write('id: $id, ')
+          ..write('email: $email, ')
+          ..write('password: $password, ')
+          ..write('username: $username, ')
+          ..write('fullName: $fullName, ')
+          ..write('profilePicturePath: $profilePicturePath, ')
+          ..write('lastLoginAt: $lastLoginAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ProfilesTable profiles = $ProfilesTable(this);
   late final $TodoTableTable todoTable = $TodoTableTable(this);
+  late final $SavedAccountsTable savedAccounts = $SavedAccountsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [profiles, todoTable];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    profiles,
+    todoTable,
+    savedAccounts,
+  ];
 }
 
 typedef $$ProfilesTableCreateCompanionBuilder =
@@ -1271,6 +1807,261 @@ typedef $$TodoTableTableProcessedTableManager =
       TodoTableData,
       PrefetchHooks Function()
     >;
+typedef $$SavedAccountsTableCreateCompanionBuilder =
+    SavedAccountsCompanion Function({
+      Value<int> id,
+      required String email,
+      required String password,
+      Value<String?> username,
+      Value<String?> fullName,
+      Value<String?> profilePicturePath,
+      Value<DateTime> lastLoginAt,
+      Value<DateTime> createdAt,
+    });
+typedef $$SavedAccountsTableUpdateCompanionBuilder =
+    SavedAccountsCompanion Function({
+      Value<int> id,
+      Value<String> email,
+      Value<String> password,
+      Value<String?> username,
+      Value<String?> fullName,
+      Value<String?> profilePicturePath,
+      Value<DateTime> lastLoginAt,
+      Value<DateTime> createdAt,
+    });
+
+class $$SavedAccountsTableFilterComposer
+    extends Composer<_$AppDatabase, $SavedAccountsTable> {
+  $$SavedAccountsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get password => $composableBuilder(
+    column: $table.password,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get username => $composableBuilder(
+    column: $table.username,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fullName => $composableBuilder(
+    column: $table.fullName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get profilePicturePath => $composableBuilder(
+    column: $table.profilePicturePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastLoginAt => $composableBuilder(
+    column: $table.lastLoginAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SavedAccountsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SavedAccountsTable> {
+  $$SavedAccountsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get password => $composableBuilder(
+    column: $table.password,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get username => $composableBuilder(
+    column: $table.username,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fullName => $composableBuilder(
+    column: $table.fullName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get profilePicturePath => $composableBuilder(
+    column: $table.profilePicturePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastLoginAt => $composableBuilder(
+    column: $table.lastLoginAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SavedAccountsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SavedAccountsTable> {
+  $$SavedAccountsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+
+  GeneratedColumn<String> get password =>
+      $composableBuilder(column: $table.password, builder: (column) => column);
+
+  GeneratedColumn<String> get username =>
+      $composableBuilder(column: $table.username, builder: (column) => column);
+
+  GeneratedColumn<String> get fullName =>
+      $composableBuilder(column: $table.fullName, builder: (column) => column);
+
+  GeneratedColumn<String> get profilePicturePath => $composableBuilder(
+    column: $table.profilePicturePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastLoginAt => $composableBuilder(
+    column: $table.lastLoginAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$SavedAccountsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SavedAccountsTable,
+          SavedAccount,
+          $$SavedAccountsTableFilterComposer,
+          $$SavedAccountsTableOrderingComposer,
+          $$SavedAccountsTableAnnotationComposer,
+          $$SavedAccountsTableCreateCompanionBuilder,
+          $$SavedAccountsTableUpdateCompanionBuilder,
+          (
+            SavedAccount,
+            BaseReferences<_$AppDatabase, $SavedAccountsTable, SavedAccount>,
+          ),
+          SavedAccount,
+          PrefetchHooks Function()
+        > {
+  $$SavedAccountsTableTableManager(_$AppDatabase db, $SavedAccountsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SavedAccountsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SavedAccountsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SavedAccountsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> email = const Value.absent(),
+                Value<String> password = const Value.absent(),
+                Value<String?> username = const Value.absent(),
+                Value<String?> fullName = const Value.absent(),
+                Value<String?> profilePicturePath = const Value.absent(),
+                Value<DateTime> lastLoginAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => SavedAccountsCompanion(
+                id: id,
+                email: email,
+                password: password,
+                username: username,
+                fullName: fullName,
+                profilePicturePath: profilePicturePath,
+                lastLoginAt: lastLoginAt,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String email,
+                required String password,
+                Value<String?> username = const Value.absent(),
+                Value<String?> fullName = const Value.absent(),
+                Value<String?> profilePicturePath = const Value.absent(),
+                Value<DateTime> lastLoginAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => SavedAccountsCompanion.insert(
+                id: id,
+                email: email,
+                password: password,
+                username: username,
+                fullName: fullName,
+                profilePicturePath: profilePicturePath,
+                lastLoginAt: lastLoginAt,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SavedAccountsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SavedAccountsTable,
+      SavedAccount,
+      $$SavedAccountsTableFilterComposer,
+      $$SavedAccountsTableOrderingComposer,
+      $$SavedAccountsTableAnnotationComposer,
+      $$SavedAccountsTableCreateCompanionBuilder,
+      $$SavedAccountsTableUpdateCompanionBuilder,
+      (
+        SavedAccount,
+        BaseReferences<_$AppDatabase, $SavedAccountsTable, SavedAccount>,
+      ),
+      SavedAccount,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1279,4 +2070,6 @@ class $AppDatabaseManager {
       $$ProfilesTableTableManager(_db, _db.profiles);
   $$TodoTableTableTableManager get todoTable =>
       $$TodoTableTableTableManager(_db, _db.todoTable);
+  $$SavedAccountsTableTableManager get savedAccounts =>
+      $$SavedAccountsTableTableManager(_db, _db.savedAccounts);
 }

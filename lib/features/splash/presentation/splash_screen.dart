@@ -5,6 +5,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:to_do_app/core/components/background_screen.dart';
 import 'package:to_do_app/core/constants/icon_class.dart';
 import 'package:to_do_app/core/utils/app_utils.dart';
+import 'package:to_do_app/features/auth/presentation/saved_accounts_screen.dart';
 import 'package:to_do_app/features/splash/bloc/splash_bloc.dart';
 import 'package:to_do_app/features/splash/bloc/splash_event.dart';
 import 'package:to_do_app/features/splash/bloc/splash_state.dart';
@@ -62,6 +63,16 @@ class _SplashScreenState extends State<SplashScreen>
         } else if (state is SplashUnauthenticated) {
           debugPrint('SplashScreen: Navigating to Login');
           Navigator.pushReplacementNamed(context, AppUtils.loginRoute);
+        } else if (state is SplashShowSavedAccounts) {
+          debugPrint('SplashScreen: Showing saved accounts screen');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SavedAccountsScreen(
+                savedAccounts: state.savedAccounts,
+              ),
+            ),
+          );
         }
       },
       child: Scaffold(

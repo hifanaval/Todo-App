@@ -8,6 +8,7 @@ import 'package:to_do_app/features/splash/bloc/splash_bloc.dart';
 import 'package:to_do_app/features/splash/presentation/splash_screen.dart';
 import 'package:to_do_app/features/auth/presentation/login_screen.dart';
 import 'package:to_do_app/features/auth/presentation/registration_screen.dart';
+import 'package:to_do_app/features/auth/presentation/saved_accounts_screen.dart';
 import 'package:to_do_app/features/home/presentation/pages/home_page.dart';
 import 'package:to_do_app/features/home/presentation/pages/favorites_page.dart';
 import 'package:to_do_app/features/profile/presentation/pages/edit_profile_screen.dart';
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => SplashBloc()),
+        BlocProvider(create: (context) => SplashBloc(database: database)),
         BlocProvider(create: (context) => ThemeBloc()),
         BlocProvider(
           create: (context) => AuthBloc(database: database),
@@ -71,10 +72,21 @@ class MyApp extends StatelessWidget {
           AppUtils.registrationRoute: (context) => const RegistrationScreen(),
           AppUtils.homeRoute: (context) => const HomePage(),
           AppUtils.favoritesRoute: (context) => const FavoritesPage(),
-              AppUtils.editProfileRoute: (context) => const EditProfileScreen(),
-              AppUtils.settingsRoute: (context) => const SettingsScreen(),
-            },
-            onGenerateRoute: (settings) => null,
+          AppUtils.editProfileRoute: (context) => const EditProfileScreen(),
+          AppUtils.settingsRoute: (context) => const SettingsScreen(),
+          '/saved-accounts': (context) {
+            final arguments = ModalRoute.of(context)!.settings.arguments;
+            if (arguments is List<SavedAccount>) {
+              return SavedAccountsScreen(savedAccounts: arguments);
+            } else if (arguments is List) {
+              // Cast dynamic list to SavedAccount list
+              final savedAccounts = arguments.map((e) => e as SavedAccount).toList();
+              return SavedAccountsScreen(savedAccounts: savedAccounts);
+            }
+            return SavedAccountsScreen(savedAccounts: []);
+          },
+        },
+        onGenerateRoute: (settings) => null,
           );
         },
       ),

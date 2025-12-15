@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:to_do_app/core/database/app_database.dart';
 
 import 'splash_event.dart';
 import 'splash_state.dart';
 
 class SplashBloc extends Bloc<SplashEvent, SplashState> {
-  SplashBloc() : super(SplashInitial()) {
+  final AppDatabase database;
+
+  SplashBloc({required this.database}) : super(SplashInitial()) {
     on<SplashStarted>(_onSplashStarted);
   }
 
@@ -41,8 +44,17 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       debugPrint('SplashBloc: User exists and is logged in, navigating to Home');
       emit(SplashAuthenticated());
     } else {
-      debugPrint('SplashBloc: No user or not logged in, navigating to Login');
-      emit(SplashUnauthenticated());
+      // Check for saved accounts with remember me = true
+      final savedAccounts = await database.getAllSavedAccounts();
+      debugPrint('SplashBloc: Found ${savedAccounts.length} saved accounts');
+      
+      if (savedAccounts.isNotEmpty) {
+        debugPrint('SplashBloc: Showing saved accounts screen');
+        emit(SplashShowSavedAccounts(savedAccounts));
+      } else {
+        debugPrint('SplashBloc: No saved accounts, navigating to Login');
+        emit(SplashUnauthenticated());
+      }
     }
   }
 }

@@ -99,10 +99,8 @@ class SettingsScreen extends StatelessWidget {
     if (shouldLogout) {
       context.read<AuthBloc>().add(LogoutEvent());
       if (context.mounted) {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          AppUtils.loginRoute,
-          (route) => false,
-        );
+        // Navigate after logout - shows saved accounts if available
+        await AppUtils.navigateAfterLogout(context);
       }
     }
   }

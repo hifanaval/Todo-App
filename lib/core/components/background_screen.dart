@@ -45,7 +45,7 @@ class BackgroundPattern extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
-                    ColorClass.darkPrimary.withOpacity(0.15),
+                    ColorClass.darkPrimary.withValues(alpha: 0.15),
                     Colors.transparent,
                   ],
                 ),
@@ -62,7 +62,7 @@ class BackgroundPattern extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
-                    ColorClass.darkAccent.withOpacity(0.12),
+                    ColorClass.darkAccent.withValues(alpha: 0.12),
                     Colors.transparent,
                   ],
                 ),
@@ -79,7 +79,7 @@ class BackgroundPattern extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
-                    ColorClass.darkSuccess.withOpacity(0.1),
+                    ColorClass.darkSuccess.withValues(alpha: 0.1),
                     Colors.transparent,
                   ],
                 ),
@@ -96,7 +96,7 @@ class BackgroundPattern extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
-                    ColorClass.darkPrimary.withOpacity(0.12),
+                    ColorClass.darkPrimary.withValues(alpha: 0.12),
                     Colors.transparent,
                   ],
                 ),
@@ -113,7 +113,7 @@ class BackgroundPattern extends StatelessWidget {
               width: 200,
               height: 200,
               decoration: BoxDecoration(
-                color: ColorClass.kDecorativeGreen.withOpacity(0.3),
+                color: ColorClass.kDecorativeGreen.withValues(alpha: 0.3),
                 shape: BoxShape.circle,
               ),
             ),
@@ -125,7 +125,7 @@ class BackgroundPattern extends StatelessWidget {
               width: 150,
               height: 150,
               decoration: BoxDecoration(
-                color: ColorClass.kDecorativeBeige.withOpacity(0.4),
+                color: ColorClass.kDecorativeBeige.withValues(alpha: 0.4),
                 shape: BoxShape.circle,
               ),
             ),
@@ -137,7 +137,7 @@ class BackgroundPattern extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: ColorClass.kDecorativeGreen.withOpacity(0.2),
+                color: ColorClass.kDecorativeGreen.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(60),
               ),
             ),
@@ -149,7 +149,7 @@ class BackgroundPattern extends StatelessWidget {
               width: 180,
               height: 180,
               decoration: BoxDecoration(
-                color: ColorClass.kDecorativeBeige.withOpacity(0.3),
+                color: ColorClass.kDecorativeBeige.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(90),
               ),
             ),

@@ -55,19 +55,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return;
       }
 
-      // Get saved credentials from SharedPreferences
-      final savedEmail = await LocalAuth.email;
-      final savedPassword = await LocalAuth.password;
-
-      if (event.email != savedEmail) {
-        debugPrint('AuthBloc: Email not found');
-        emit(AuthError('Email not found'));
-        return;
+      // Check if account exists in saved_accounts table (for quick login)
+      final savedAccount = await _database.getSavedAccountByEmail(event.email);
+      
+      // Validate credentials - check saved account first, then SharedPreferences
+      bool isValidCredentials = false;
+      
+      if (savedAccount != null) {
+        // Validate against saved account
+        if (savedAccount.password == event.password) {
+          isValidCredentials = true;
+          debugPrint('AuthBloc: Credentials validated against saved account');
+        }
+      } else {
+        // Fallback to SharedPreferences validation
+        final savedEmail = await LocalAuth.email;
+        final savedPassword = await LocalAuth.password;
+        
+        if (event.email == savedEmail && event.password == savedPassword) {
+          isValidCredentials = true;
+          debugPrint('AuthBloc: Credentials validated against SharedPreferences');
+        }
       }
 
-      if (event.password != savedPassword) {
-        debugPrint('AuthBloc: Incorrect password');
-        emit(AuthError('Incorrect password'));
+      if (!isValidCredentials) {
+        debugPrint('AuthBloc: Invalid credentials');
+        emit(AuthError('Invalid email or password'));
         return;
       }
 
@@ -83,8 +96,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final localAuth = LocalAuth();
       if (event.rememberMe) {
         await localAuth.setLoggedIn(true);
+        
+        // Save account to saved_accounts table if remember me is true
+        debugPrint('AuthBloc: Saving account to saved_accounts table');
+        final savedAccount = SavedAccountsCompanion.insert(
+          email: event.email,
+          password: event.password,
+          username: Value(profile.username),
+          fullName: Value(profile.fullName),
+          profilePicturePath: profile.profilePicturePath != null
+              ? Value(profile.profilePicturePath)
+              : const Value.absent(),
+          lastLoginAt: Value(DateTime.now()),
+        );
+        await _database.insertSavedAccount(savedAccount);
+        debugPrint('AuthBloc: Account saved to saved_accounts table');
       } else {
         await localAuth.setLoggedIn(false);
+        // Remove from saved accounts if remember me is false
+        await _database.deleteSavedAccountByEmail(event.email);
+        debugPrint('AuthBloc: Account removed from saved_accounts table');
       }
 
       debugPrint('AuthBloc: Login successful');

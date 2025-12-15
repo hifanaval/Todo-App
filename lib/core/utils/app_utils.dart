@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:to_do_app/core/components/toast_widget.dart';
 import 'package:to_do_app/core/constants/color_class.dart';
 import 'package:to_do_app/core/constants/textstyle_class.dart';
+import 'package:to_do_app/core/database/app_database.dart';
 
 // Global navigator key for accessing context from anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -252,6 +253,38 @@ class AppUtils {
       confirmText: 'Logout',
       cancelText: 'Cancel',
     );
+  }
+
+  /// Navigate after logout - shows saved accounts if available, otherwise login screen
+  static Future<void> navigateAfterLogout(BuildContext context) async {
+    debugPrint('AppUtils: Navigating after logout');
+    try {
+      final database = AppDatabase();
+      final savedAccounts = await database.getAllSavedAccounts();
+      debugPrint('AppUtils: Found ${savedAccounts.length} saved accounts after logout');
+      
+      if (savedAccounts.isNotEmpty) {
+        debugPrint('AppUtils: Showing saved accounts screen');
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/saved-accounts',
+          (route) => false,
+          arguments: savedAccounts,
+        );
+      } else {
+        debugPrint('AppUtils: No saved accounts, navigating to login');
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          loginRoute,
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      debugPrint('AppUtils: Error checking saved accounts: $e');
+      // Fallback to login screen
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        loginRoute,
+        (route) => false,
+      );
+    }
   }
 }
 
