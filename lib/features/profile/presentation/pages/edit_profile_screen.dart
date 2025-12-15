@@ -274,11 +274,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 // Update the form with new values
                 _initializeForm(state.profile);
                 
-                // Reload profile in drawer by triggering a reload from API
+                // Reload profile in drawer by triggering a reload from local DB
                 final email = await LocalAuth.email;
                 if (email != null) {
-                  debugPrint('EditProfileScreen: Reloading profile in drawer from API');
-                  context.read<ProfileBloc>().add(LoadProfile(email, fromApi: true));
+                  debugPrint('EditProfileScreen: Reloading profile in drawer from local DB');
+                  context.read<ProfileBloc>().add(LoadProfile(email));
+                }
+                
+                // Navigate back after successful update
+                if (mounted) {
+                  Navigator.pop(context);
                 }
               } else if (state is ProfileError) {
                 debugPrint('EditProfileScreen: Error: ${state.message}');

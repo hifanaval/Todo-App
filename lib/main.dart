@@ -19,8 +19,6 @@ import 'package:to_do_app/features/home/data/remote/todo_remote_source.dart';
 import 'package:to_do_app/features/home/data/local/todo_dao.dart';
 import 'package:to_do_app/features/home/data/repository/todo_repository.dart';
 import 'package:to_do_app/features/profile/bloc/profile_bloc.dart';
-import 'package:to_do_app/features/profile/data/remote/profile_remote_source.dart';
-import 'package:to_do_app/features/profile/data/repository/profile_repository.dart';
 import 'package:http/http.dart' as http;
 
 void main() {
@@ -43,10 +41,6 @@ class MyApp extends StatelessWidget {
     final todoRepository = TodoRepository(todoRemoteSource, todoDao);
     final homeBloc = HomeBloc(todoRepository);
 
-    // Initialize Profile dependencies
-    final profileRemoteSource = ProfileRemoteSource(httpClient);
-    final profileRepository = ProfileRepository(profileRemoteSource, database);
-
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => SplashBloc()),
@@ -55,7 +49,7 @@ class MyApp extends StatelessWidget {
           create: (context) => AuthBloc(database: database),
         ),
         BlocProvider(
-          create: (context) => ProfileBloc(repository: profileRepository),
+          create: (context) => ProfileBloc(database: database),
         ),
         BlocProvider.value(value: homeBloc),
       ],
@@ -63,19 +57,19 @@ class MyApp extends StatelessWidget {
         builder: (context, themeState) {
           return MaterialApp(
             title: 'To Do App',
-            debugShowCheckedModeBanner: false,
+        debugShowCheckedModeBanner: false,
             theme: AppThemeData.getLightTheme(),
             darkTheme: AppThemeData.getDarkTheme(),
             themeMode: themeState.theme == AppTheme.dark
                 ? ThemeMode.dark
                 : ThemeMode.light,
-            initialRoute: AppUtils.splashRoute,
-            routes: {
-              AppUtils.splashRoute: (context) => const SplashScreen(),
-              AppUtils.loginRoute: (context) => LoginScreen(),
-              AppUtils.registrationRoute: (context) => const RegistrationScreen(),
-              AppUtils.homeRoute: (context) => const HomePage(),
-              AppUtils.favoritesRoute: (context) => const FavoritesPage(),
+        initialRoute: AppUtils.splashRoute,
+        routes: {
+          AppUtils.splashRoute: (context) => const SplashScreen(),
+          AppUtils.loginRoute: (context) => LoginScreen(),
+          AppUtils.registrationRoute: (context) => const RegistrationScreen(),
+          AppUtils.homeRoute: (context) => const HomePage(),
+          AppUtils.favoritesRoute: (context) => const FavoritesPage(),
               AppUtils.editProfileRoute: (context) => const EditProfileScreen(),
               AppUtils.settingsRoute: (context) => const SettingsScreen(),
             },

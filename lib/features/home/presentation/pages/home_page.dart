@@ -8,7 +8,7 @@ import 'package:to_do_app/core/constants/textstyle_class.dart';
 import 'package:to_do_app/core/utils/app_utils.dart';
 import 'package:to_do_app/features/auth/bloc/auth_bloc.dart';
 import 'package:to_do_app/features/auth/bloc/auth_event.dart';
-import 'package:to_do_app/features/auth/bloc/auth_state.dart';
+import 'package:to_do_app/features/auth/data/local_auth_source.dart';
 import 'package:to_do_app/features/profile/bloc/profile_bloc.dart';
 import 'package:to_do_app/features/profile/bloc/profile_event.dart';
 import 'package:to_do_app/features/profile/bloc/profile_state.dart';
@@ -225,29 +225,29 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'My Todos',
-                    style: TextStyleClass.primaryFont700(
-                      28,
-                      ColorClass.kTextColor,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'My Todos',
+                style: TextStyleClass.primaryFont700(
+                  28,
+                  ColorClass.kTextColor,
+                ),
+              ),
+              const SizedBox(height: 4),
+              BlocBuilder<HomeBloc, HomeState>(
+                builder: (context, state) {
+                  final remaining =
+                      state.todos.where((t) => !t.completed).length;
+                  return Text(
+                    '$remaining tasks remaining',
+                    style: TextStyleClass.primaryFont400(
+                      14,
+                      ColorClass.kTextSecondary,
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  BlocBuilder<HomeBloc, HomeState>(
-                    builder: (context, state) {
-                      final remaining =
-                          state.todos.where((t) => !t.completed).length;
-                      return Text(
-                        '$remaining tasks remaining',
-                        style: TextStyleClass.primaryFont400(
-                          14,
-                          ColorClass.kTextSecondary,
-                        ),
-                      );
-                    },
+                  );
+                },
                   ),
                 ],
               ),
@@ -258,16 +258,16 @@ class _HomePageState extends State<HomePage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const FavoritesPage(),
+                  builder: (context) => const SettingsScreen(),
                 ),
               );
             },
             icon: Icon(
-              Icons.favorite_rounded,
+              Icons.settings_rounded,
               color: ColorClass.kPrimaryColor,
               size: 24,
             ),
-            tooltip: 'Favorites',
+            tooltip: 'Settings',
           ),
         ],
       ),
@@ -275,41 +275,117 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildDrawer(BuildContext context) {
-    return BlocBuilder<AuthBloc, AuthState>(
-      builder: (context, authState) {
-        if (authState is! AuthAuthenticated) {
-          return const Drawer();
+    // Load profile data from local DB using email from SharedPreferences
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      debugPrint('HomePage: Loading profile from local DB for drawer');
+      try {
+        final email = await LocalAuth.email;
+        if (email != null && email.isNotEmpty) {
+          debugPrint('HomePage: Found email in SharedPreferences: $email');
+          context.read<ProfileBloc>().add(LoadProfile(email));
+        } else {
+          debugPrint('HomePage: No email found in SharedPreferences');
         }
+      } catch (e) {
+        debugPrint('HomePage: Error loading profile: $e');
+      }
+    });
 
-        final profile = authState.profile;
-        final email = profile.email;
+    return Drawer(
+      child: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, profileState) {
+          debugPrint('HomePage: Drawer ProfileBloc state: ${profileState.runtimeType}');
+          
+          // Show loading state
+          if (profileState is ProfileLoading) {
+            return Container(
+              color: ColorClass.kCardColor,
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: ColorClass.kPrimaryColor,
+                ),
+              ),
+            );
+          }
 
-        // Load profile data from API when drawer opens
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          debugPrint('HomePage: Loading profile from API for drawer');
-          context.read<ProfileBloc>().add(LoadProfile(email, fromApi: true));
-        });
+          // Show error state
+          if (profileState is ProfileError) {
+            return Container(
+              color: ColorClass.kCardColor,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: ColorClass.stateError,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Failed to load profile',
+                      style: TextStyleClass.primaryFont500(
+                        16,
+                        ColorClass.kTextColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      profileState.message,
+                      style: TextStyleClass.primaryFont400(
+                        14,
+                        ColorClass.kTextSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
 
-        return Drawer(
-          child: BlocBuilder<ProfileBloc, ProfileState>(
-            builder: (context, profileState) {
-              // Use latest profile data if available
-              dynamic currentProfile = profile;
-              if (profileState is ProfileLoaded) {
-                currentProfile = profileState.profile;
-              } else if (profileState is ProfileUpdated) {
-                currentProfile = profileState.profile;
-              }
+          // Get profile from state
+          dynamic currentProfile;
+          if (profileState is ProfileLoaded) {
+            currentProfile = profileState.profile;
+            debugPrint('HomePage: Using ProfileLoaded state for drawer');
+          } else if (profileState is ProfileUpdated) {
+            currentProfile = profileState.profile;
+            debugPrint('HomePage: Using ProfileUpdated state for drawer');
+          } else {
+            // Initial state - show loading or empty
+            debugPrint('HomePage: ProfileBloc in initial state, showing loading');
+            return Container(
+              color: ColorClass.kCardColor,
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: ColorClass.kPrimaryColor,
+                ),
+              ),
+            );
+          }
 
-              int calculateCompleteness(dynamic p) {
-                int completeness = 0;
-                if (p.username.isNotEmpty) completeness += 33;
-                if (p.profilePicturePath != null && p.profilePicturePath!.isNotEmpty) completeness += 33;
-                if (p.dateOfBirth != null) completeness += 34;
-                return completeness;
-              }
+          // Ensure we have a valid profile
+          if (currentProfile == null) {
+            debugPrint('HomePage: ERROR - currentProfile is null!');
+            return Container(
+              color: ColorClass.kCardColor,
+              child: const Center(
+                child: Text('Profile not available'),
+              ),
+            );
+          }
 
-              final completeness = calculateCompleteness(currentProfile);
+          int calculateCompleteness(dynamic p) {
+            int completeness = 0;
+            if (p.username.isNotEmpty) completeness += 33;
+            if (p.profilePicturePath != null && p.profilePicturePath!.isNotEmpty) completeness += 33;
+            if (p.dateOfBirth != null) completeness += 34;
+            return completeness;
+          }
+
+          final completeness = calculateCompleteness(currentProfile);
+          debugPrint('HomePage: Profile completeness: $completeness%');
 
               return Container(
                 color: ColorClass.kCardColor,
@@ -339,11 +415,20 @@ class _HomePageState extends State<HomePage> {
                                     color: ColorClass.neutral200,
                                   ),
                                   child: currentProfile.profilePicturePath != null &&
-                                          File(currentProfile.profilePicturePath).existsSync()
+                                          currentProfile.profilePicturePath!.isNotEmpty &&
+                                          File(currentProfile.profilePicturePath!).existsSync()
                                       ? ClipOval(
                                           child: Image.file(
-                                            File(currentProfile.profilePicturePath),
+                                            File(currentProfile.profilePicturePath!),
                                             fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              debugPrint('HomePage: Error loading profile image: $error');
+                                              return Icon(
+                                                Icons.person,
+                                                size: 40,
+                                                color: ColorClass.kTextSecondary,
+                                              );
+                                            },
                                           ),
                                         )
                                       : Icon(
@@ -370,6 +455,27 @@ class _HomePageState extends State<HomePage> {
                                 ColorClass.kTextSecondary,
                               ),
                             ),
+                            if (currentProfile.dateOfBirth != null) ...[
+                              const SizedBox(height: 4),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.calendar_today,
+                                    size: 14,
+                                    color: ColorClass.kTextSecondary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${currentProfile.dateOfBirth!.year}-${currentProfile.dateOfBirth!.month.toString().padLeft(2, '0')}-${currentProfile.dateOfBirth!.day.toString().padLeft(2, '0')}',
+                                    style: TextStyleClass.primaryFont400(
+                                      12,
+                                      ColorClass.kTextSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                             const SizedBox(height: 12),
                             // Profile Completeness
                             Container(
@@ -517,9 +623,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               );
             },
-          ),
-        );
-      },
+      ),
     );
   }
 

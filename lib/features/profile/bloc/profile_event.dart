@@ -10,12 +10,11 @@ abstract class ProfileEvent extends Equatable {
 
 class LoadProfile extends ProfileEvent {
   final String email;
-  final bool fromApi;
 
-  const LoadProfile(this.email, {this.fromApi = false});
+  const LoadProfile(this.email);
 
   @override
-  List<Object?> get props => [email, fromApi];
+  List<Object?> get props => [email];
 }
 
 class UpdateProfile extends ProfileEvent {

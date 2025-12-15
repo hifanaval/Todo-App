@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:drift/drift.dart';
 import 'package:to_do_app/core/database/app_database.dart';
-import 'package:to_do_app/features/profile/data/repository/profile_repository.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
-  final ProfileRepository _repository;
+  final AppDatabase _database;
 
-  ProfileBloc({required ProfileRepository repository})
-      : _repository = repository,
+  ProfileBloc({required AppDatabase database})
+      : _database = database,
         super(ProfileInitial()) {
     on<LoadProfile>(_onLoadProfile);
     on<UpdateProfile>(_onUpdateProfile);
@@ -20,29 +20,20 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     LoadProfile event,
     Emitter<ProfileState> emit,
   ) async {
-    debugPrint('ProfileBloc: Loading profile for email: ${event.email}, fromApi: ${event.fromApi}');
+    debugPrint('ProfileBloc: Loading profile from local DB for email: ${event.email}');
     emit(ProfileLoading());
 
     try {
-      Profile? profile;
-      
-      if (event.fromApi) {
-        // Fetch from API first, then save to local DB
-        debugPrint('ProfileBloc: Fetching profile from API');
-        profile = await _repository.fetchProfileFromApi(event.email);
-      } else {
-        // Load from local DB only
-        debugPrint('ProfileBloc: Loading profile from local DB');
-        profile = await _repository.getProfileFromLocal(event.email);
-      }
+      // Load from local DB (data stored during registration)
+      final profile = await _database.getProfileByEmail(event.email);
 
       if (profile == null) {
-        debugPrint('ProfileBloc: Profile not found');
+        debugPrint('ProfileBloc: Profile not found in local DB');
         emit(ProfileError('Profile not found'));
         return;
       }
 
-      debugPrint('ProfileBloc: Profile loaded successfully');
+      debugPrint('ProfileBloc: Profile loaded successfully from local DB');
       emit(ProfileLoaded(profile));
     } catch (e) {
       debugPrint('ProfileBloc: Error loading profile: $e');
@@ -58,37 +49,39 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     emit(ProfileLoading());
 
     try {
-      // Get current profile from local DB first to get email for fallback
-      final currentProfile = await _repository.getProfileFromLocal('');
-      String? currentUsername;
-      
-      if (currentProfile != null && currentProfile.id == event.profileId) {
-        currentUsername = currentProfile.username;
-      } else {
-        // Fallback: get from all profiles
-        final allProfiles = await _repository.local.getAllProfiles();
-        final profile = allProfiles.firstWhere(
-          (p) => p.id == event.profileId,
-          orElse: () => throw Exception('Profile not found'),
-        );
-        currentUsername = profile.username;
-      }
-
-      // Use repository to update both API and local DB
-      final updatedProfile = await _repository.updateProfile(
-        profileId: event.profileId,
-        username: event.username != null ? event.username! : currentUsername,
-        profilePicturePath: event.profilePicture?.path,
-        dateOfBirth: event.dateOfBirth,
+      // Get current profile from local DB
+      final allProfiles = await _database.getAllProfiles();
+      final currentProfile = allProfiles.firstWhere(
+        (p) => p.id == event.profileId,
+        orElse: () => throw Exception('Profile not found'),
       );
 
-      if (updatedProfile == null) {
-        debugPrint('ProfileBloc: Failed to update profile');
+      // Prepare update companion - only update fields that are provided
+      final updateCompanion = ProfilesCompanion(
+        username: event.username != null
+            ? Value(event.username!)
+            : Value(currentProfile.username),
+        profilePicturePath: event.profilePicture != null
+            ? Value(event.profilePicture!.path)
+            : Value(currentProfile.profilePicturePath),
+        dateOfBirth: event.dateOfBirth != null
+            ? Value(event.dateOfBirth!)
+            : Value(currentProfile.dateOfBirth),
+      );
+
+      // Update profile in local DB
+      final success = await _database.updateProfile(event.profileId, updateCompanion);
+      if (!success) {
+        debugPrint('ProfileBloc: Failed to update profile in local DB');
         emit(ProfileError('Failed to update profile'));
         return;
       }
 
-      debugPrint('ProfileBloc: Profile updated successfully in API and local DB');
+      // Reload updated profile from local DB
+      final updatedProfiles = await _database.getAllProfiles();
+      final updatedProfile = updatedProfiles.firstWhere((p) => p.id == event.profileId);
+
+      debugPrint('ProfileBloc: Profile updated successfully in local DB');
       emit(ProfileUpdated(updatedProfile));
     } catch (e) {
       debugPrint('ProfileBloc: Error updating profile: $e');
