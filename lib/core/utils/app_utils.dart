@@ -4,6 +4,9 @@ import 'package:to_do_app/core/components/toast_widget.dart';
 import 'package:to_do_app/core/constants/color_class.dart';
 import 'package:to_do_app/core/constants/textstyle_class.dart';
 
+// Global navigator key for accessing context from anywhere
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 class AppUtils {
   // Route names
   static const String splashRoute = '/splash';
@@ -68,25 +71,80 @@ class AppUtils {
 
   /// Show a toast message
   static void showToast(
-    BuildContext context, {
+    BuildContext? context, {
     required String message,
     Duration duration = const Duration(seconds: 2),
   }) {
     debugPrint('Showing toast: $message');
-    final overlay = Overlay.of(context);
+    
+    // Schedule toast to show after the current frame is built
+    // This ensures overlay is available when called from BLoC
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showToastInternal(context, message, duration);
+    });
+  }
+
+  /// Internal method to show toast
+  static void _showToastInternal(
+    BuildContext? context,
+    String message,
+    Duration duration,
+  ) {
+    // Try to get overlay from navigator key first (for BLoC calls)
+    OverlayState? overlay;
+    
+    if (context != null) {
+      // Use provided context
+      try {
+        overlay = Overlay.of(context);
+      } catch (e) {
+        debugPrint('AppUtils: Cannot get overlay from provided context: $e');
+      }
+    }
+    
+    // If no overlay from context, try navigator key
+    if (overlay == null) {
+      final navigator = navigatorKey.currentState;
+      if (navigator != null) {
+        overlay = navigator.overlay;
+      }
+    }
+    
+    // If still no overlay, try getting it from navigator key's context
+    if (overlay == null) {
+      final ctx = navigatorKey.currentContext;
+      if (ctx != null) {
+        try {
+          overlay = Overlay.of(ctx);
+        } catch (e) {
+          debugPrint('AppUtils: Cannot get overlay from navigator key context: $e');
+        }
+      }
+    }
+    
+    if (overlay == null) {
+      debugPrint('AppUtils: Cannot show toast - no overlay available');
+      return;
+    }
 
     late OverlayEntry entry;
 
     entry = OverlayEntry(
       builder: (_) => ToastWidget(
         message: message,
-        onDismiss: () => entry.remove(),
+        onDismiss: () {
+          if (entry.mounted) {
+            entry.remove();
+          }
+        },
       ),
     );
 
     overlay.insert(entry);
     Future.delayed(duration, () {
-      entry.remove();
+      if (entry.mounted) {
+        entry.remove();
+      }
     });
   }
 
@@ -102,23 +160,39 @@ class AppUtils {
     return isValid;
   }
 
-  /// Show logout confirmation dialog
-  static Future<bool> showLogoutConfirmation(BuildContext context) async {
-    debugPrint('Showing logout confirmation dialog');
+  /// Show a generic confirmation dialog
+  static Future<bool> showConfirmationDialog({
+    required BuildContext context,
+    required String title,
+    required String message,
+    String confirmText = 'Confirm',
+    String cancelText = 'Cancel',
+    Color? confirmColor,
+    Color? cancelColor,
+  }) async {
+    debugPrint('Showing confirmation dialog: $title');
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    final cardColor = isDark ? ColorClass.darkCard : ColorClass.kCardColor;
+    final textColor = isDark ? ColorClass.darkForeground : ColorClass.kTextColor;
+    final textSecondaryColor = isDark ? ColorClass.darkMutedForeground : ColorClass.kTextSecondary;
+    final primaryColor = confirmColor ?? (isDark ? ColorClass.darkPrimary : ColorClass.kPrimaryColor);
+    
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        backgroundColor: ColorClass.kCardColor,
+        backgroundColor: cardColor,
         title: Text(
-          'Logout',
-          style: TextStyleClass.primaryFont600(18, ColorClass.kTextColor),
+          title,
+          style: TextStyleClass.primaryFont600(18, textColor),
         ),
         content: Text(
-          'Are you sure you want to logout?',
-          style: TextStyleClass.primaryFont400(14, ColorClass.kTextSecondary),
+          message,
+          style: TextStyleClass.primaryFont400(14, textSecondaryColor),
         ),
         actions: [
           TextButton(
@@ -126,8 +200,8 @@ class AppUtils {
               Navigator.pop(context, false);
             },
             child: Text(
-              'Cancel',
-              style: TextStyleClass.primaryFont500(14, ColorClass.kTextSecondary),
+              cancelText,
+              style: TextStyleClass.primaryFont500(14, textSecondaryColor),
             ),
           ),
           ElevatedButton(
@@ -135,11 +209,11 @@ class AppUtils {
               Navigator.pop(context, true);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: ColorClass.kPrimaryColor,
+              backgroundColor: primaryColor,
               foregroundColor: Colors.white,
             ),
             child: Text(
-              'Logout',
+              confirmText,
               style: TextStyleClass.primaryFont500(14, Colors.white),
             ),
           ),
@@ -147,6 +221,37 @@ class AppUtils {
       ),
     );
     return result ?? false;
+  }
+
+  /// Show delete confirmation dialog
+  static Future<bool> showDeleteConfirmation({
+    required BuildContext context,
+    required String itemName,
+  }) async {
+    debugPrint('Showing delete confirmation for: $itemName');
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    return showConfirmationDialog(
+      context: context,
+      title: 'Delete Todo',
+      message: 'Are you sure you want to delete "$itemName"?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      confirmColor: isDark ? ColorClass.darkDestructive : ColorClass.stateError,
+    );
+  }
+
+  /// Show logout confirmation dialog
+  static Future<bool> showLogoutConfirmation(BuildContext context) async {
+    debugPrint('Showing logout confirmation dialog');
+    return showConfirmationDialog(
+      context: context,
+      title: 'Logout',
+      message: 'Are you sure you want to logout?',
+      confirmText: 'Logout',
+      cancelText: 'Cancel',
+    );
   }
 }
 

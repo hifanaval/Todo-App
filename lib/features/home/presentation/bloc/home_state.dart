@@ -5,12 +5,14 @@ class HomeState {
   final bool isLoading;
   final bool isLoadingMore;
   final bool hasMore;
+  final bool hasTriedApiAndFailed; // Track if API was called and failed
 
   HomeState({
     required this.todos,
     required this.isLoading,
     this.isLoadingMore = false,
     required this.hasMore,
+    this.hasTriedApiAndFailed = false,
   });
 
   HomeState copyWith({
@@ -18,12 +20,14 @@ class HomeState {
     bool? isLoading,
     bool? isLoadingMore,
     bool? hasMore,
+    bool? hasTriedApiAndFailed,
   }) {
     return HomeState(
       todos: todos ?? this.todos,
       isLoading: isLoading ?? this.isLoading,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       hasMore: hasMore ?? this.hasMore,
+      hasTriedApiAndFailed: hasTriedApiAndFailed ?? this.hasTriedApiAndFailed,
     );
   }
 }

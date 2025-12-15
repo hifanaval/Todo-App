@@ -35,6 +35,17 @@ class TodoDao extends DatabaseAccessor<AppDatabase>
         .write(TodoTableCompanion(isFavorite: Value(isFavorite)));
   }
 
+  /// Toggle completed status
+  Future<void> toggleCompleted(int id, bool completed) async {
+    await (update(todoTable)..where((t) => t.id.equals(id)))
+        .write(TodoTableCompanion(completed: Value(completed)));
+  }
+
+  /// Delete a todo
+  Future<void> deleteTodo(int id) async {
+    await (delete(todoTable)..where((t) => t.id.equals(id))).go();
+  }
+
   /// Get favorite todos
   Future<List<TodoTableData>> getFavoriteTodos() {
     return (select(todoTable)..where((t) => t.isFavorite.equals(true))).get();

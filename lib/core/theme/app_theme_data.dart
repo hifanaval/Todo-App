@@ -54,44 +54,50 @@ class AppThemeData {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.dark(
-        primary: ColorClass.kPrimaryLight,
-        secondary: ColorClass.kAccentColor,
-        surface: const Color(0xFF1E1E1E),
-        background: const Color(0xFF121212),
-        error: ColorClass.stateError,
+        primary: ColorClass.darkPrimary,
+        secondary: ColorClass.darkSecondary,
+        surface: ColorClass.darkCard,
+        background: ColorClass.darkBackground,
+        error: ColorClass.darkDestructive,
+        onPrimary: ColorClass.darkForeground,
+        onSecondary: ColorClass.darkSecondaryForeground,
+        onSurface: ColorClass.darkForeground,
+        onBackground: ColorClass.darkForeground,
+        onError: ColorClass.darkForeground,
       ),
-      scaffoldBackgroundColor: const Color(0xFF121212),
-      cardColor: const Color(0xFF1E1E1E),
+      scaffoldBackgroundColor: ColorClass.darkBackground,
+      cardColor: ColorClass.darkCard,
       appBarTheme: AppBarTheme(
-        backgroundColor: const Color(0xFF1E1E1E),
+        backgroundColor: ColorClass.darkCard,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: ColorClass.darkForeground),
         titleTextStyle: TextStyle(
           fontFamily: 'RethinkSans',
           fontSize: 20,
           fontWeight: FontWeight.w600,
-          color: Colors.white,
+          color: ColorClass.darkForeground,
         ),
       ),
-      drawerTheme: const DrawerThemeData(
-        backgroundColor: Color(0xFF1E1E1E),
+      drawerTheme: DrawerThemeData(
+        backgroundColor: ColorClass.darkCard,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF1E1E1E),
+        fillColor: ColorClass.darkCard,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF404040)),
+          borderSide: BorderSide(color: ColorClass.darkBorder),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF404040)),
+          borderSide: BorderSide(color: ColorClass.darkBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: ColorClass.kPrimaryLight, width: 2),
+          borderSide: BorderSide(color: ColorClass.darkRing, width: 2),
         ),
       ),
+      dividerColor: ColorClass.darkBorder,
     );
   }
 

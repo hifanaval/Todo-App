@@ -56,6 +56,7 @@ class MyApp extends StatelessWidget {
       child: BlocBuilder<ThemeBloc, dynamic>(
         builder: (context, themeState) {
           return MaterialApp(
+            navigatorKey: navigatorKey,
             title: 'To Do App',
         debugShowCheckedModeBanner: false,
             theme: AppThemeData.getLightTheme(),

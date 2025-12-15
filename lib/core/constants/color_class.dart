@@ -1,6 +1,48 @@
 import 'package:flutter/material.dart';
 
 class ColorClass {
+  // Helper method to get theme-aware colors
+  static Color getTextColor(BuildContext? context) {
+    if (context == null) return kTextColor;
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark ? darkForeground : kTextColor;
+  }
+
+  static Color getTextSecondaryColor(BuildContext? context) {
+    if (context == null) return kTextSecondary;
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark ? darkMutedForeground : kTextSecondary;
+  }
+
+  static Color getCardColor(BuildContext? context) {
+    if (context == null) return kCardColor;
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark ? darkCard : kCardColor;
+  }
+
+  static Color getBackgroundColor(BuildContext? context) {
+    if (context == null) return kBackgroundColor;
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark ? darkBackground : kBackgroundColor;
+  }
+
+  static Color getPrimaryColor(BuildContext? context) {
+    if (context == null) return kPrimaryColor;
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark ? darkPrimary : kPrimaryColor;
+  }
+
+  static Color getFavoriteColor(BuildContext? context) {
+    if (context == null) return stateError;
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark ? darkFavorite : stateError;
+  }
+
+  static Color getBorderColor(BuildContext? context) {
+    if (context == null) return neutral300;
+    final brightness = Theme.of(context).brightness;
+    return brightness == Brightness.dark ? darkBorder : neutral300;
+  }
   static const Color kPrimaryColor = Color(0xFF4A7C59); // Dark Green (like the app)
   static const Color kPrimaryLight = Color(0xFF6B9B7A); // Medium Green
   static const Color kPrimaryDark = Color(0xFF3A5F47); // Darker Green
@@ -38,4 +80,21 @@ class ColorClass {
   
   // State colors
   static const Color stateError = Color(0xFFDC2626); // Red for errors
+  
+  // Dark Mode Colors
+  static const Color darkBackground = Color(0xFF121916);
+  static const Color darkForeground = Color(0xFFE7E6E2);
+  static const Color darkCard = Color(0xFF1C2220);
+  static const Color darkPrimary = Color(0xFF509668);
+  static const Color darkSecondary = Color(0xFF2A322F);
+  static const Color darkSecondaryForeground = Color(0xFFDBD9D4);
+  static const Color darkMuted = Color(0xFF262B29);
+  static const Color darkMutedForeground = Color(0xFF8F8E88);
+  static const Color darkAccent = Color(0xFF437054);
+  static const Color darkDestructive = Color(0xFFCC3333);
+  static const Color darkFavorite = Color(0xFFDB4861);
+  static const Color darkFavoriteMuted = Color(0xFF7A5257);
+  static const Color darkSuccess = Color(0xFF339966);
+  static const Color darkBorder = Color(0xFF2F3836);
+  static const Color darkRing = Color(0xFF509668);
 }
